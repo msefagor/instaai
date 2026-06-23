@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0E12">
+<title>Promptla — AI Fotoğraf Dönüştürücü</title>
+<style>
+  :root{ --bg:#0E0E12; --sur:#16161D; --alt:#1F1F29; --txt:#F5F5FA; --sec:#A0A0B0; --pur:#7C5CFF; --blu:#3BC9FF; --dng:#FF5C7C; --ok:#4CD787; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  .acc{background:linear-gradient(135deg,var(--pur),var(--blu))}
+  .wrap{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;position:sticky;top:0;background:var(--bg);z-index:5}
+  .logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--pur),var(--blu));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .gear{cursor:pointer;background:var(--alt);border:0;color:var(--txt);width:40px;height:40px;border-radius:12px;font-size:18px}
+  main{flex:1;padding:0 16px 28px}
+  .card{background:var(--sur);border-radius:18px;overflow:hidden;margin-bottom:14px}
+  .src{position:relative;width:100%;aspect-ratio:1/1;background:var(--alt);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .src img{width:100%;height:100%;object-fit:cover;display:block}
+  .src .hint{color:var(--sec);text-align:center;font-size:14px;padding:20px}
+  .src .ic{font-size:46px;display:block;margin-bottom:8px}
+  .badge{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);border-radius:8px;padding:4px 9px;font-size:11px}
+  .chip{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);border:1px solid var(--pur);border-radius:8px;padding:4px 9px;font-size:11px;display:flex;align-items:center;gap:5px}
+  .seg{display:flex;gap:10px;margin:12px 0}
+  .seg button{flex:1;height:46px;border-radius:13px;border:0;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
+  .b-cam{background:var(--alt)} .b-gal{background:var(--alt)}
+  label.l{display:block;color:var(--sec);font-size:13px;margin:14px 2px 6px}
+  textarea,input,select{width:100%;background:var(--alt);border:0;border-radius:13px;color:var(--txt);padding:13px;font-size:15px;font-family:inherit}
+  textarea{min-height:84px;resize:vertical}
+  .enh{display:flex;justify-content:flex-end;margin-top:6px}
+  .enh button{background:none;border:0;color:var(--blu);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .styles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .sty{padding:8px 14px;border-radius:20px;background:var(--alt);color:#fff;font-size:13px;cursor:pointer;border:0}
+  .sty.on{background:var(--pur)}
+  .gen{width:100%;height:54px;border:0;border-radius:15px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px}
+  .gen:disabled{opacity:.55}
+  .note{color:var(--sec);font-size:11px;text-align:center;margin-top:10px}
+  .result{padding:0}
+  .result .big{width:100%;display:block}
+  .ba{display:flex;gap:8px;padding:12px}
+  .ba .col{flex:1;text-align:center}
+  .ba img{width:100%;height:90px;object-fit:cover;border-radius:10px}
+  .ba .cap{font-size:11px;color:var(--sec);margin-top:4px}
+  .ractions{display:flex;gap:10px;padding:0 12px 14px}
+  .ractions button{flex:1;height:46px;border-radius:13px;border:0;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
+  .disc{background:var(--alt);border-radius:12px;padding:11px;font-size:11px;color:var(--sec);margin:0 12px 12px}
+  /* overlays */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:30}
+  .overlay.show{display:flex}
+  .sheet{width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;padding:18px;max-height:88dvh;overflow:auto}
+  .sheet h3{margin:4px 0 10px;font-size:17px}
+  .sheet .row{display:flex;gap:10px;margin-top:12px}
+  .sheet button.primary{height:48px;border-radius:13px;border:0;color:#fff;font-weight:700;font-size:15px;flex:1;cursor:pointer}
+  .sheet button.ghost{height:48px;border-radius:13px;border:1px solid #333;background:none;color:var(--txt);flex:1;cursor:pointer}
+  .warn{background:rgba(255,92,124,.12);border:1px solid rgba(255,92,124,.4);color:#ffb3c2;border-radius:12px;padding:11px;font-size:12px;margin-top:10px}
+  a{color:var(--blu)}
+  /* camera */
+  #cam{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:40}
+  #cam video{width:100%;height:100%;object-fit:cover}
+  #cam .bar{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-around;padding:24px}
+  #cam .shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid var(--pur);cursor:pointer}
+  #cam .tbtn{color:#fff;background:rgba(0,0,0,.4);border:0;font-size:14px;padding:10px 14px;border-radius:12px;cursor:pointer}
+  .spinner{width:42px;height:42px;border:4px solid var(--alt);border-top-color:var(--pur);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .center{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 0}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#000;border:1px solid #333;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Promptla</div>
+    <button class="gear" onclick="openSettings()" aria-label="Ayarlar">&#9881;</button>
+  </header>
+  <main id="main"></main>
+</div>
+
+<!-- Kamera -->
+<div id="cam">
+  <video id="camvid" autoplay playsinline muted></video>
+  <div class="bar">
+    <button class="tbtn" onclick="closeCam()">Kapat</button>
+    <div class="shutter" onclick="capture()"></div>
+    <button class="tbtn" onclick="flipCam()">Çevir</button>
+  </div>
+</div>
+
+<!-- Ayarlar -->
+<div class="overlay" id="settings">
+  <div class="sheet">
+    <h3>Ayarlar</h3>
+    <label class="l">Gemini API anahtarı</label>
+    <input id="keyInput" type="password" placeholder="AIza... (AI Studio anahtarı)" autocomplete="off">
+    <label class="l">Görsel modeli</label>
+    <input id="modelInput" type="text" placeholder="gemini-2.5-flash-image">
+    <div class="warn">Anahtarınız yalnızca bu cihazda (tarayıcı belleğinde) saklanır, hiçbir yere gönderilmez ve koda/GitHub'a yazılmaz. Anahtarınızı kimseyle paylaşmayın.</div>
+    <div style="font-size:12px;color:var(--sec);margin-top:10px">Anahtar almak için: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></div>
+    <div class="row">
+      <button class="ghost" onclick="closeSettings()">Vazgeç</button>
+      <button class="primary acc" onclick="saveSettings()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<input id="fileinp" type="file" accept="image/*" capture="user" style="display:none">
+<div id="toast"></div>
+
+<script>
+"use strict";
+var KEY_K="promptla_gemini_key", MODEL_K="promptla_gemini_model";
+var DEFAULT_MODEL="gemini-2.5-flash-image";
+var captured=null, resultUrl=null, facing="user", camStream=null, busy=false;
+var state={ prompt:"", style:"cinematic", screen:"studio" };
+
+var STYLES=[["cinematic","Sinematik"],["cyberpunk","Cyberpunk"],["anime","Anime"],
+  ["historical","Tarihi/Osmanlı"],["professional","Profesyonel"],["luxury","Lüks"],
+  ["fantasy","Fantastik"],["nature","Doğa"]];
+
+var STYLE_DESC={
+  cinematic:"cinematic film still, dramatic three-point lighting, shallow depth of field, 35mm anamorphic lens, teal-and-orange color grade, volumetric light, subtle film grain, ultra-detailed, 8k",
+  cyberpunk:"cyberpunk megacity at night, glowing neon signage, rain-soaked reflective streets, cyan-magenta rim light, atmospheric fog, high contrast, cinematic, ultra-detailed",
+  anime:"high-quality anime illustration, clean line art, cel shading, vibrant saturated colors, soft studio lighting, expressive, detailed background",
+  historical:"classical Ottoman-era oil portrait, ornate period attire, warm Rembrandt lighting, museum-quality fine brushwork, rich textures",
+  professional:"professional studio headshot, clean neutral background, soft key light with gentle fill, 85mm portrait lens, sharp focus, natural skin tones, LinkedIn-ready",
+  luxury:"luxury fashion editorial, studio strobe lighting, elegant composition, glossy high-end magazine aesthetic, refined color grading",
+  fantasy:"epic fantasy scene, cinematic god rays, painterly detail, rich atmosphere, dramatic composition, ultra-detailed",
+  nature:"cinematic documentary look, natural golden-hour lighting, wide-angle depth, true-to-life colors, crisp detail"
+};
+
+/* ---------- helpers ---------- */
+function $(id){return document.getElementById(id);}
+function getKey(){return localStorage.getItem(KEY_K)||"";}
+function getModel(){return localStorage.getItem(MODEL_K)||DEFAULT_MODEL;}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},2600);}
+
+/* ---------- settings ---------- */
+function openSettings(){$("keyInput").value=getKey();$("modelInput").value=getModel();$("settings").classList.add("show");}
+function closeSettings(){$("settings").classList.remove("show");}
+function saveSettings(){
+  var k=$("keyInput").value.trim(), m=$("modelInput").value.trim()||DEFAULT_MODEL;
+  if(k) localStorage.setItem(KEY_K,k); else localStorage.removeItem(KEY_K);
+  localStorage.setItem(MODEL_K,m);
+  closeSettings(); toast("Ayarlar kaydedildi.");
+}
+
+/* ---------- camera ---------- */
+function openCam(){
+  $("cam").style.display="flex";
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({video:{facingMode:facing},audio:false})
+      .then(function(s){camStream=s;$("camvid").srcObject=s;})
+      .catch(function(){closeCam();$("fileinp").click();});
+  } else { closeCam(); $("fileinp").click(); }
+}
+function stopCam(){ if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;} }
+function closeCam(){ stopCam(); $("cam").style.display="none"; }
+function flipCam(){ facing=(facing==="user")?"environment":"user"; stopCam(); openCam(); }
+function capture(){
+  var v=$("camvid"), c=document.createElement("canvas");
+  c.width=v.videoWidth||720; c.height=v.videoHeight||720;
+  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+  captured=c.toDataURL("image/jpeg",0.9);
+  resultUrl=null; closeCam(); render();
+}
+$("fileinp").addEventListener("change",function(e){
+  var f=e.target.files[0]; if(!f)return;
+  var r=new FileReader(); r.onload=function(){captured=r.result;resultUrl=null;render();}; r.readAsDataURL(f);
+});
+
+/* ---------- prompt ---------- */
+function buildPrompt(){
+  var base=(state.prompt||"").trim();
+  var desc=STYLE_DESC[state.style]||"";
+  var head="Edit the provided photo of the person. Preserve the subject's identity, facial features and body. ";
+  return head + (base?base+". ":"") + desc + ", highly detailed, professional quality.";
+}
+function localEnhance(text,style){
+  var t=(text||"bu fotoğrafı dönüştür").trim().replace(/\.$/,"");
+  var d=STYLE_DESC[style]||STYLE_DESC.cinematic;
+  return "Kullanıcının yüz ve kimliğini koruyarak, "+t+"; "+d+"; kompozisyon dengeli, ışık profesyonel, yüksek çözünürlük, fotogerçekçi kalite.";
+}
+async function geminiText(prompt){
+  var key=getKey(); if(!key) throw new Error("no-key");
+  var url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  var data=await res.json();
+  if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
+  var parts=(((data.candidates||[])[0]||{}).content||{}).parts||[];
+  var txt=parts.map(function(p){return p.text||"";}).join("").trim();
+  if(!txt) throw new Error("empty");
+  return txt;
+}
+async function enhance(){
+  var ta=$("promptEl"); var user=ta.value.trim();
+  toast("Prompt geliştiriliyor…");
+  var instr="Asagidaki kullanici istegini, bir kisinin fotografini AI ile donusturmek icin tek bir profesyonel GORSEL URETIM PROMPTUNA cevir. "+
+    "Kisinin kimligini ve yuz hatlarini koru. Isik, lens, kompozisyon, renk derecelendirme ve atmosfer detaylari ekle. "+
+    "Secilen stil: "+state.style+" ("+(STYLE_DESC[state.style]||"")+"). "+
+    "Sadece nihai promptu Turkce yaz, baska aciklama ekleme. Kullanici istegi: "+(user||"bu fotografi donustur");
+  try{
+    var out=await geminiText(instr);
+    ta.value=out; state.prompt=out; toast("Profesyonel prompt hazır.");
+  }catch(e){
+    ta.value=localEnhance(user,state.style); state.prompt=ta.value;
+    if(String(e.message)==="no-key") toast("Anahtar yok — yerel profesyonel şablon kullanıldı.");
+    else toast("Çevrimdışı şablon kullanıldı.");
+  }
+}
+
+/* ---------- generation (REAL Gemini, captured photo) ---------- */
+function imagePart(data){
+  for(var i=0;i<(data.candidates||[]).length;i++){
+    var parts=((data.candidates[i].content||{}).parts)||[];
+    for(var j=0;j<parts.length;j++){
+      var inl=parts[j].inline_data||parts[j].inlineData;
+      if(inl&&inl.data) return {data:inl.data,mime:inl.mime_type||inl.mimeType||"image/png"};
+    }
+  }
+  return null;
+}
+async function generate(){
+  if(busy) return;
+  if(!captured){ toast("Önce bir fotoğraf çekin veya seçin."); return; }
+  var key=getKey();
+  if(!key){ openSettings(); toast("Önce Gemini API anahtarınızı girin."); return; }
+  busy=true; state.screen="loading"; render();
+  try{
+    var b64=captured.split(",")[1];
+    var mime=captured.substring(5,captured.indexOf(";"))||"image/jpeg";
+    var model=getModel();
+    var url="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent";
+    var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+      body:JSON.stringify({
+        contents:[{parts:[{text:buildPrompt()},{inline_data:{mime_type:mime,data:b64}}]}],
+        generationConfig:{responseModalities:["IMAGE"]}
+      })});
+    var data=await res.json();
+    if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
+    var img=imagePart(data);
+    if(!img) throw new Error("Yanıtta görsel yok. Model adını (Ayarlar) ve anahtarın görsel iznini kontrol edin.");
+    resultUrl="data:"+img.mime+";base64,"+img.data;
+    state.screen="result";
+  }catch(e){
+    state.screen="studio";
+    toast("Üretim hatası: "+e.message);
+  }finally{
+    busy=false; render();
+  }
+}
+
+/* ---------- share / download ---------- */
+function downloadResult(){
+  if(!resultUrl) return;
+  var a=document.createElement("a"); a.href=resultUrl; a.download="promptla.png"; a.click();
+}
+async function shareResult(){
+  if(!resultUrl) return;
+  try{
+    var blob=await (await fetch(resultUrl)).blob();
+    var file=new File([blob],"promptla.png",{type:blob.type});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"Promptla",text:"AI ile üretildi"});
+    } else { downloadResult(); }
+  }catch(e){ downloadResult(); }
+}
+
+/* ---------- render ---------- */
+function render(){
+  var m=$("main"), h="";
+  if(state.screen==="loading"){
+    h='<div class="center"><div class="spinner"></div><div style="color:var(--sec)">Gemini ile üretiliyor…</div><div style="color:var(--sec);font-size:12px">Çektiğiniz fotoğraf dönüştürülüyor</div></div>';
+    m.innerHTML=h; return;
+  }
+  if(state.screen==="result"){
+    h='<div class="card result">'
+      +'<div style="position:relative"><img class="big" src="'+resultUrl+'"><div class="chip">&#10024; AI ile üretildi</div></div>'
+      +'<div class="ba"><div class="col"><img src="'+captured+'"><div class="cap">Önce (çektiğin)</div></div><div class="col"><img src="'+resultUrl+'"><div class="cap">Sonra (AI)</div></div></div>'
+      +'<div class="ractions"><button class="acc" onclick="shareResult()">Paylaş</button><button style="background:var(--alt)" onclick="downloadResult()">İndir</button></div>'
+      +'<div class="disc">Bu içerik yapay zekâ ile üretilmiştir. Gerçek olay, belge veya kanıt olarak sunulmamalıdır.</div>'
+      +'</div>'
+      +'<button class="gen acc" onclick="state.screen=\'studio\';render()">Yeni dönüşüm</button>';
+    m.innerHTML=h; return;
+  }
+  // studio
+  h='<div class="card"><div class="src" onclick="openCam()">';
+  if(captured){
+    h+='<img src="'+captured+'"><div class="badge">Çekilen fotoğraf</div><div class="chip" style="border:0">&#128247; Değiştir</div>';
+  } else {
+    h+='<div class="hint"><span class="ic">&#128247;</span>Kameraya dokun, fotoğraf çek<br><span style="font-size:12px">veya galeriden seç</span></div>';
+  }
+  h+='</div></div>';
+  h+='<div class="seg"><button class="b-cam" onclick="openCam()">&#128247; Fotoğraf çek</button><button class="b-gal" onclick="document.getElementById(\'fileinp\').click()">&#128194; Galeriden seç</button></div>';
+  h+='<label class="l">Prompt</label><textarea id="promptEl" placeholder="Örn: Beni sinematik bir bilim kurgu sahnesine dönüştür" oninput="state.prompt=this.value">'+(state.prompt||"")+'</textarea>';
+  h+='<div class="enh"><button onclick="enhance()">&#10022; Promptu geliştir</button></div>';
+  h+='<label class="l">Hazır stiller</label><div class="styles">';
+  STYLES.forEach(function(s){ h+='<button class="sty'+(state.style===s[0]?' on':'')+'" onclick="state.style=\''+s[0]+'\';render()">'+s[1]+'</button>'; });
+  h+='</div>';
+  h+='<button class="gen acc" onclick="generate()"'+(busy?' disabled':'')+'>Üret</button>';
+  h+='<div class="note">Çektiğiniz fotoğraf Gemini ile dönüştürülür. Anahtar yoksa &#9881; Ayarlar\'dan ekleyin.</div>';
+  m.innerHTML=h;
+  var ta=$("promptEl"); if(ta){ ta.value=state.prompt||""; }
+}
+
+window.addEventListener("load",function(){
+  render();
+  if(!getKey()){ setTimeout(function(){ openSettings(); toast("Başlamak için Gemini API anahtarınızı girin."); }, 400); }
+});
+</script>
+</body>
+</html>
