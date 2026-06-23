@@ -3,588 +3,316 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0E0E12">
-<title>Promptla — AI Fotoğraf Dönüştürücü</title>
+<meta name="theme-color" content="#000000">
+<title>Promptla</title>
 <style>
-  :root{ --bg:#0E0E12; --sur:#16161D; --alt:#1F1F29; --txt:#F5F5FA; --sec:#A0A0B0; --pur:#7C5CFF; --blu:#3BC9FF; --dng:#FF5C7C; --ok:#4CD787; }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5}
-  .acc{background:linear-gradient(135deg,var(--pur),var(--blu))}
-  .wrap{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;position:sticky;top:0;background:var(--bg);z-index:5}
-  .logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--pur),var(--blu));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .gear{cursor:pointer;background:var(--alt);border:0;color:var(--txt);width:40px;height:40px;border-radius:12px;font-size:18px}
-  main{flex:1;padding:0 16px 28px}
-  .card{background:var(--sur);border-radius:18px;overflow:hidden;margin-bottom:14px}
-  .src{position:relative;width:100%;aspect-ratio:1/1;background:var(--alt);display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .src img{width:100%;height:100%;object-fit:cover;display:block}
-  .src .hint{color:var(--sec);text-align:center;font-size:14px;padding:20px}
-  .src .ic{font-size:46px;display:block;margin-bottom:8px}
-  .badge{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);border-radius:8px;padding:4px 9px;font-size:11px}
-  .chip{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);border:1px solid var(--pur);border-radius:8px;padding:4px 9px;font-size:11px;display:flex;align-items:center;gap:5px}
-  .seg{display:flex;gap:10px;margin:12px 0}
-  .seg button{flex:1;height:46px;border-radius:13px;border:0;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
-  .b-cam{background:var(--alt)} .b-gal{background:var(--alt)}
-  label.l{display:block;color:var(--sec);font-size:13px;margin:14px 2px 6px}
-  textarea,input,select{width:100%;background:var(--alt);border:0;border-radius:13px;color:var(--txt);padding:13px;font-size:15px;font-family:inherit}
-  textarea{min-height:84px;resize:vertical}
-  .enh{display:flex;justify-content:flex-end;margin-top:6px}
-  .enh button{background:none;border:0;color:var(--blu);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px}
-  .styles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-  .sty{padding:8px 14px;border-radius:20px;background:var(--alt);color:#fff;font-size:13px;cursor:pointer;border:0}
-  .sty.on{background:var(--pur)}
-  .gen{width:100%;height:54px;border:0;border-radius:15px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px}
-  .gen:disabled{opacity:.55}
-  .note{color:var(--sec);font-size:11px;text-align:center;margin-top:10px}
-  .result{padding:0}
-  .result .big{width:100%;display:block}
-  .ba{display:flex;gap:8px;padding:12px}
-  .ba .col{flex:1;text-align:center}
-  .ba img{width:100%;height:90px;object-fit:cover;border-radius:10px}
-  .ba .cap{font-size:11px;color:var(--sec);margin-top:4px}
-  .ractions{display:flex;gap:10px;padding:0 12px 14px}
-  .ractions button{flex:1;height:46px;border-radius:13px;border:0;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
-  .disc{background:var(--alt);border-radius:12px;padding:11px;font-size:11px;color:var(--sec);margin:0 12px 12px}
-  /* overlays */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:30}
-  .overlay.show{display:flex}
-  .sheet{width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;padding:18px;max-height:88dvh;overflow:auto}
-  .sheet h3{margin:4px 0 10px;font-size:17px}
-  .sheet .row{display:flex;gap:10px;margin-top:12px}
-  .sheet button.primary{height:48px;border-radius:13px;border:0;color:#fff;font-weight:700;font-size:15px;flex:1;cursor:pointer}
-  .sheet button.ghost{height:48px;border-radius:13px;border:1px solid #333;background:none;color:var(--txt);flex:1;cursor:pointer}
-  .warn{background:rgba(255,92,124,.12);border:1px solid rgba(255,92,124,.4);color:#ffb3c2;border-radius:12px;padding:11px;font-size:12px;margin-top:10px}
-  a{color:var(--blu)}
-  /* camera */
-  #cam{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:40}
-  #cam video{width:100%;height:100%;object-fit:cover}
-  #cam .bar{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-around;padding:24px}
-  #cam .shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid var(--pur);cursor:pointer}
-  #cam .tbtn{color:#fff;background:rgba(0,0,0,.4);border:0;font-size:14px;padding:10px 14px;border-radius:12px;cursor:pointer}
-  .spinner{width:42px;height:42px;border:4px solid var(--alt);border-top-color:var(--pur);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .center{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 0}
-  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#000;border:1px solid #333;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
-  #toast.show{opacity:1}
+ :root{--bg:#000;--sur:#0d0d0f;--alt:#1a1a1d;--bd:#262626;--txt:#fff;--sec:#a8a8a8;--pur:#7C5CFF;--blu:#3BC9FF;--red:#ed4956}
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px}
+ .app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+ svg{width:24px;height:24px;display:block}
+ .acc{background:linear-gradient(135deg,var(--pur),var(--blu))}
+ header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;z-index:8}
+ .logo{font-family:"Segoe Script","Bradley Hand",cursive;font-size:26px;font-weight:700;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);-webkit-background-clip:text;background-clip:text;color:transparent}
+ .hicons{display:flex;gap:18px;align-items:center;color:#fff}
+ .hicons span{cursor:pointer}
+ main{flex:1;padding-bottom:64px}
+ /* stories */
+ .stories{display:flex;gap:14px;overflow-x:auto;padding:12px 14px;border-bottom:1px solid var(--bd)}
+ .stories::-webkit-scrollbar{display:none}
+ .story{flex:0 0 auto;width:64px;text-align:center;cursor:pointer}
+ .ring{width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
+ .ring.me{background:var(--bd)}
+ .ring .av{width:100%;height:100%;border-radius:50%;background:var(--alt);border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;overflow:hidden}
+ .story .nm{font-size:11px;color:var(--sec);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .plus{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#0095f6;border:2px solid #000;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center}
+ /* post */
+ .post{border-bottom:1px solid var(--bd)}
+ .phead{display:flex;align-items:center;gap:10px;padding:10px 14px}
+ .pav{width:34px;height:34px;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center;font-size:14px}
+ .pav.r{padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)}
+ .pav.r div{width:100%;height:100%;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center;border:2px solid #000}
+ .pname{font-weight:600;font-size:13px}
+ .pimg{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--alt)}
+ .pact{display:flex;align-items:center;gap:16px;padding:10px 14px 6px;color:#fff}
+ .pact .bm{margin-left:auto}
+ .pact span{cursor:pointer;display:flex}
+ .plikes{padding:0 14px;font-weight:600;font-size:13px}
+ .pcap{padding:4px 14px 2px;font-size:13px}
+ .pcom{padding:2px 14px;color:var(--sec);font-size:13px;cursor:pointer}
+ .ptime{padding:2px 14px 12px;color:var(--sec);font-size:11px;text-transform:uppercase}
+ .ailbl{display:inline-flex;align-items:center;gap:4px;background:rgba(124,92,255,.15);border:1px solid var(--pur);color:#cfc6ff;border-radius:6px;padding:1px 6px;font-size:10px;margin-left:6px;vertical-align:middle}
+ /* bottom nav */
+ .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;height:60px;background:#000;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-around;z-index:9}
+ .bnav .it{cursor:pointer;color:#fff;opacity:.65;display:flex;align-items:center}
+ .bnav .it.on{opacity:1}
+ .bnav .pa{width:28px;height:28px;border-radius:50%;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center}
+ .navav{width:26px;height:26px;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center;font-size:12px;border:1px solid #444}
+ /* grid */
+ .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:2px}
+ .grid img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:var(--alt)}
+ .empty{padding:50px 24px;text-align:center;color:var(--sec)}
+ /* profile */
+ .phdr{padding:18px 16px;display:flex;align-items:center;gap:22px}
+ .pbig{width:84px;height:84px;border-radius:50%;background:var(--alt);display:flex;align-items:center;justify-content:center;font-size:32px}
+ .stat{display:flex;gap:26px}
+ .stat .s{text-align:center}.stat .s b{font-size:17px}.stat .s div{font-size:12px;color:var(--sec)}
+ .pbio{padding:0 16px 14px}
+ .pbtns{display:flex;gap:8px;padding:0 16px 14px}
+ .pbtns button{flex:1;height:34px;border-radius:9px;border:0;background:var(--alt);color:#fff;font-weight:600;cursor:pointer}
+ /* create */
+ .wrap2{padding:14px 16px}
+ .srcbox{width:100%;aspect-ratio:1/1;border-radius:14px;background:var(--alt);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+ .srcbox img{width:100%;height:100%;object-fit:cover}
+ .srcbox .hint{color:var(--sec);text-align:center;padding:20px}
+ .seg{display:flex;gap:10px;margin:12px 0}
+ .seg button{flex:1;height:46px;border-radius:12px;border:0;background:var(--alt);color:#fff;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+ label.l{display:block;color:var(--sec);font-size:13px;margin:14px 2px 6px}
+ textarea,input,select{width:100%;background:var(--alt);border:0;border-radius:12px;color:#fff;padding:12px;font-size:15px;font-family:inherit}
+ textarea{min-height:80px;resize:vertical}
+ .enh{display:flex;justify-content:flex-end;margin-top:6px}
+ .enh button{background:none;border:0;color:var(--blu);font-size:13px;cursor:pointer}
+ .styles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+ .sty{padding:8px 14px;border-radius:20px;background:var(--alt);color:#fff;font-size:13px;cursor:pointer;border:0}
+ .sty.on{background:var(--pur)}
+ .gen{width:100%;height:52px;border:0;border-radius:14px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px}
+ .gen:disabled{opacity:.5}
+ .note{color:var(--sec);font-size:11px;text-align:center;margin-top:10px}
+ .ba{display:flex;gap:8px;margin-top:12px}.ba .c{flex:1;text-align:center}.ba img{width:100%;height:96px;object-fit:cover;border-radius:10px}.ba .t{font-size:11px;color:var(--sec);margin-top:4px}
+ .ract{display:flex;gap:10px;margin-top:14px}.ract button{flex:1;height:46px;border-radius:12px;border:0;color:#fff;font-weight:600;cursor:pointer}
+ .disc{background:var(--alt);border-radius:10px;padding:10px;font-size:11px;color:var(--sec);margin-top:12px}
+ /* overlays */
+ .ov{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;z-index:30}
+ .ov.show{display:flex}
+ .sheet{width:100%;max-width:520px;background:var(--sur);border-radius:18px 18px 0 0;padding:18px;max-height:90dvh;overflow:auto}
+ .sheet h3{margin-bottom:10px;font-size:17px}
+ .row{display:flex;gap:10px;margin-top:12px}
+ .row .primary{height:46px;border-radius:12px;border:0;color:#fff;font-weight:700;flex:1;cursor:pointer}
+ .row .ghost{height:46px;border-radius:12px;border:1px solid #333;background:none;color:#fff;flex:1;cursor:pointer}
+ .warn{background:rgba(237,73,86,.12);border:1px solid rgba(237,73,86,.4);color:#ffb3bd;border-radius:10px;padding:10px;font-size:12px;margin-top:10px}
+ .testbtn{width:100%;height:44px;border-radius:12px;border:1px solid var(--blu);background:none;color:var(--blu);font-weight:600;cursor:pointer;margin-top:12px}
+ #testout{font-size:12px;margin-top:10px;white-space:pre-wrap;color:var(--sec)}
+ a{color:var(--blu)}
+ #cam{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:40}
+ #cam video{flex:1;width:100%;object-fit:cover}
+ #cam .bar{display:flex;align-items:center;justify-content:space-around;padding:22px}
+ #cam .sh{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid var(--pur);cursor:pointer}
+ #cam .tb{color:#fff;background:rgba(255,255,255,.15);border:0;padding:10px 14px;border-radius:10px;cursor:pointer}
+ .spin{width:42px;height:42px;border:4px solid var(--alt);border-top-color:var(--pur);border-radius:50%;animation:sp 1s linear infinite}
+ @keyframes sp{to{transform:rotate(360deg)}}
+ .center{display:flex;flex-direction:column;align-items:center;gap:14px;padding:60px 0}
+ #toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:#1a1a1d;border:1px solid #333;color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center}
+ #toast.show{opacity:1}
+ .reel{height:calc(100dvh - 64px);scroll-snap-align:start;position:relative;display:flex;align-items:center;justify-content:center;background:#000}
+ .reel img{width:100%;height:100%;object-fit:cover}
+ .reelmeta{position:absolute;left:14px;bottom:20px;right:60px}
+ #reels{height:calc(100dvh - 64px);overflow-y:auto;scroll-snap-type:y mandatory}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="logo">Promptla</div>
-    <button class="gear" onclick="openSettings()" aria-label="Ayarlar">&#9881;</button>
-  </header>
+<div class="app">
+  <header id="hdr"></header>
   <main id="main"></main>
 </div>
+<nav class="bnav" id="bnav"></nav>
 
-<!-- Kamera -->
 <div id="cam">
   <video id="camvid" autoplay playsinline muted></video>
-  <div class="bar">
-    <button class="tbtn" onclick="closeCam()">Kapat</button>
-    <div class="shutter" onclick="capture()"></div>
-    <button class="tbtn" onclick="flipCam()">Çevir</button>
-  </div>
+  <div class="bar"><button class="tb" onclick="closeCam()">Kapat</button><div class="sh" onclick="capture()"></div><button class="tb" onclick="flipCam()">Çevir</button></div>
 </div>
 
-<!-- Ayarlar -->
-<div class="overlay" id="settings">
-  <div class="sheet">
-    <h3>Ayarlar</h3>
-    <label class="l">Gemini API anahtarı</label>
-    <input id="keyInput" type="password" placeholder="AIza... (AI Studio anahtarı)" autocomplete="off">
-    <label class="l">Görsel modeli</label>
-    <input id="modelInput" type="text" placeholder="gemini-2.5-flash-image">
-    <div class="warn">Anahtarınız yalnızca bu cihazda (tarayıcı belleğinde) saklanır, hiçbir yere gönderilmez ve koda/GitHub'a yazılmaz. Anahtarınızı kimseyle paylaşmayın.</div>
-    <div style="font-size:12px;color:var(--sec);margin-top:10px">Anahtar almak için: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></div>
-    <div class="row">
-      <button class="ghost" onclick="closeSettings()">Vazgeç</button>
-      <button class="primary acc" onclick="saveSettings()">Kaydet</button>
-    </div>
-  </div>
-</div>
+<div class="ov" id="settings"><div class="sheet">
+  <h3>Ayarlar</h3>
+  <label class="l">Gemini API anahtarı</label>
+  <input id="keyInput" type="password" placeholder="AIza... (AI Studio anahtarı)" autocomplete="off">
+  <label class="l">Görsel modeli</label>
+  <input id="modelInput" type="text" placeholder="gemini-2.5-flash-image">
+  <button class="testbtn" onclick="testConn()">Bağlantıyı test et</button>
+  <div id="testout"></div>
+  <div class="warn">Anahtar yalnızca bu cihazda saklanır; koda/GitHub'a yazılmaz. Anahtarınız <b>AIza...</b> ile başlamalıdır (AI Studio). Almak için: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></div>
+  <div class="row"><button class="ghost" onclick="closeSettings()">Kapat</button><button class="primary acc" onclick="saveSettings()">Kaydet</button></div>
+</div></div>
 
 <input id="fileinp" type="file" accept="image/*" capture="user" style="display:none">
 <div id="toast"></div>
 
 <script>
 "use strict";
-var KEY_K="promptla_gemini_key", MODEL_K="promptla_gemini_model";
-var DEFAULT_MODEL="gemini-2.5-flash-image";
-var captured=null, resultUrl=null, facing="user", camStream=null, busy=false;
-var state={ prompt:"", style:"cinematic", screen:"studio" };
-
-var STYLES=[["cinematic","Sinematik"],["cyberpunk","Cyberpunk"],["anime","Anime"],
-  ["historical","Tarihi/Osmanlı"],["professional","Profesyonel"],["luxury","Lüks"],
-  ["fantasy","Fantastik"],["nature","Doğa"]];
-
-var STYLE_DESC={
-  cinematic:"cinematic film still, dramatic three-point lighting, shallow depth of field, 35mm anamorphic lens, teal-and-orange color grade, volumetric light, subtle film grain, ultra-detailed, 8k",
-  cyberpunk:"cyberpunk megacity at night, glowing neon signage, rain-soaked reflective streets, cyan-magenta rim light, atmospheric fog, high contrast, cinematic, ultra-detailed",
-  anime:"high-quality anime illustration, clean line art, cel shading, vibrant saturated colors, soft studio lighting, expressive, detailed background",
-  historical:"classical Ottoman-era oil portrait, ornate period attire, warm Rembrandt lighting, museum-quality fine brushwork, rich textures",
-  professional:"professional studio headshot, clean neutral background, soft key light with gentle fill, 85mm portrait lens, sharp focus, natural skin tones, LinkedIn-ready",
-  luxury:"luxury fashion editorial, studio strobe lighting, elegant composition, glossy high-end magazine aesthetic, refined color grading",
-  fantasy:"epic fantasy scene, cinematic god rays, painterly detail, rich atmosphere, dramatic composition, ultra-detailed",
-  nature:"cinematic documentary look, natural golden-hour lighting, wide-angle depth, true-to-life colors, crisp detail"
+var SEED={"source": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHCAkIBgoJCAkMCwoMDxoRDw4ODx8WGBMaJSEnJiQhJCMpLjsyKSw4LCMkM0Y0OD0/QkNCKDFITUhATTtBQj//2wBDAQsMDA8NDx4RER4/KiQqPz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz//wAARCAEsASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDWooor2jzQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBaKKKm4woooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoop8UUkz7IkLt6AUnJJXYJX2GUVqRaLcOAZHSP26mpToTY+W4Gfdf8A69cUsxwsXZz/ADN1hqrV+UxqKvXGlXUIyFEi+qc/pVLFdNOtTqq8HcylCUHaSsJRRRWtyQoooouAUUUUXAWiloqLjEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtGCelFwLFjZveT7Rwg5ZvSult7eK2j2RLgdz3P1plhbC1tVQD5jyx9TVivkcfjZYibjF+6v6uexh6Cpxu9wooorzjpCqGoabHdKXjASb17N9av0VrSrToz54OzJnCM1aRxzKyOVYYYHBBptbWu2wG25Qck7X/AKGsavssNiFiKSqI8SrTdObixKKWiui5mJRS0UXAWilopAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJRS0UAJViwTffwqem4H8uagqxp7BNQhJ/vY/Pisa7fspW3s/yLp251c6iiiivhz3gooooAKKKKAK2opv0+Yf7Ofy5rl66m/YJYTk/3CPz4rl8V9Jk7fspev6HmY23OhKKWivaOESilooAKKWipuMSiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJSglWBHBByKKKQHVWs63Fuki9xz7HvUtc5p14bSUhsmJvvD0966GORJUDxsGU9CK+RxuFlh6mnwvb/I9mhWVSPmOoooriNwooqte3kdrH8xzIfur61cISqSUYq7FKSirsp65cARrbqeWO5vp2rEp8sjSytI5yzHJNNr6/C0Fh6Sh9/qeLVqe0m5CUUtFdVzISiloouAtFFFRcYUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAVLb3Mtu2YnxnqOxqKiplGM1aSuhptO6NePWeAJYefVTUh1mHHEUhPvisSiuF5dhm78v4m6xNVLc0p9XmcYiQRj16ms5mZ2LOSzHqTSUV1UqFKirU42Mp1Jz+JhRRRW1yAoooouAUUUUXAWiloqQEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAFopaKm4xKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcAopaKm4xKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtSw28sx/doSPXtSbS1Y0m9EQ0VfGlykcugP40yTTp0GV2uPY1CrQfUt0qi6FOinFSpIYEEdjSVpczEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXAWiloqbgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0qqWcKOpOKLjLVhaeeS8mfLHb1rXUBVAUAAdAKbGgjjVF6KMU6vOqVHNnp06agrBRRRWRoQ3NtHcLhhhuzelYkkbRyFHGCK6Gs/VYgVWUdR8prpoVGnys5sRTTXMtzMopaK7bnAJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXAKKWipuMSiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASprQf6XFn+9UVORijqw6qc0nqrDi7NM36KRGDoGXoRkUteaesFFFFIAqtqH/Hk/wBR/OrNUdUkAjWIdScmtKavNGdV2gzLopaK9C55glFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBaKKKkYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAXbG6EX7uQ/Ieh9K0+o4rkNav303TWuo41kZWA2scDk1gw+O76HhLWIr6FiRWM6DnrE6qVVpWex6bRXnX/CxLz/oHW/8A321I/wAQr4jC2MC++5jWf1ep2Oj2sT0KeZIE3Oeew7msaWRpZC7nk1yVp4tub3UYIZLaP97IELbySMmuqraFL2e+5yVqjm7dAooorQwCiiigAooooAKKKKACiiigAooooAKKKKACiiigBaKWipuMSiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouBh+L/APkX5P8Aron868/r0Dxh/wAi9J/10T+def1vT2NYbBRRRVll3Rv+Q1Zf9dl/nXp1eY6N/wAhuy/67r/OvT6xqbmU9xKKWis7kCUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwG+bF/z0T/voUebF/wA9E/76Fee4oxWPtCbnoXmxf89E/wC+hR5sX/PRP++hXnuKMUe0C56F5sX/AD0T/voUebF/z0T/AL6Fee4oxR7QLnoXmxf89E/76FHmxf8APRP++hXnuKMUe0C56F5sX/PRP++hR5sX/PRP++hXnuKMUe0C56F5sX/PRP8AvoUebF/z0T/voV57ijFHtAuehebF/wA9E/76FHmxf89E/wC+hXnuKMUe0C56F5sX/PRP++hR5sX/AD0T/voV57ijFHtAudP4vdG8PyBXUnzE4B964CtSeMyxFVwDnvVX7E/95a6KdWPLqawkralWirX2J/7y0fYn/vLWntYdyuePcfoxA1qyJOB5y/zr03zYv+eif99CvMY7R1kViy4BzVzFYVaib0M5yV9D0LzYv+eif99CjzYv+eif99CvPcUYrL2hFz0LzYv+eif99CjzYv8Anon/AH0K89xRij2gXPQvNi/56J/30KPNi/56J/30K89xRij2gXPQvNi/56J/30KPNi/56J/30K89xRij2gXPQvNi/wCeif8AfQo82L/non/fQrz3FGKPaBc9C82L/non/fQo82L/AJ6J/wB9CvPcUYo9oFz0LzYv+eif99CjzYv+eif99CvPcUYo9oFz0LzYv+eif99CjzYv+eif99CvPcUYo9oFwooorMQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf//Z", "cinematic": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHCAkIBgoJCAkMCwoMDxoRDw4ODx8WGBMaJSEnJiQhJCMpLjsyKSw4LCMkM0Y0OD0/QkNCKDFITUhATTtBQj//2wBDAQsMDA8NDx4RER4/KiQqPz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz//wAARCAEsASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCKiiivVOEKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAWiiipuMKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKdHG8jbY1LH0FDaSuwtcbRV+PS5mGXZU9upp50lscTDPutcrxtBO3MaqjUfQzaKtzafcRDIUOPVf8ACqmK3hVhUV4u5EouO6CiiiruSFFFFFwCiiii4C0UUUhhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFGKAJ7S2a5l2jhRyx9K24YY4E2xrgdz3NNtIBBbqg+91Y+9TV87i8TKtKy+FHpUaSgrvcKKKK4jYKqXlkk4LIAsvr6/WrdFXTqSpS5osmUVJWZzTKVYqwwRwRSVp6tAPlnUdeG/pWZX01Cqq1NTR5lSHJKwUUUVsQFFFFAC0UtFIBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKKWigBKms033cQ/2s1FU1kdt5ET/exWdVv2crdmVD4kb1FFFfKnrBRRRQAUUUUAQXq77OUf7OfyrBrfvG22kpP90isGvby2/s5epw4r4kJRS0V6ZyiUUtFABRS0VICUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUoJBBHUUUUDN+3lE0KyDuOfrUlYtlcm3kwcmNuo9PetlHWRQyMGU9xXzuJw7oz8j0qVRTXmLRRRXKahRRUFzcpbpzy56LVQjKb5Y7ibUVdlbVZgEWEHk8t9Ky6fI7SOXc5Ynmm19Hh6So01E8ypPnlcSilorczEopaKACiloqbjEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEqWGeSBsxtjPUdjUdFKSUlZoabTujRTU+P3kXPqpp51OLHEbk/hWXRXI8FQbvY1Veoupdl1KRhiNQnv1NUmYsxZiST1Joorop0oUvhViJTlLdiUUtFaXIEopaKLgJRS0UXAKKWikMSilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooAKKWipuAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAlFLRRcBKKWii4CUUtFFwEopaKLgJRS0UXASiloouAUUtFIYlFLRQAlFLRQAlFLRQAlFLRQAlFLRQAlFLRQAlFLRQAlFLUkcMkp+RSfftSbS3BJvREVFXBYSY5dRTXspV5GG+hqfaR7l+zn2KtFOIIOCCD70lXcgSilooASilooASilooASilooASiloo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", "cyberpunk": "data:image/jpeg;base64,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", "anime": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHCAkIBgoJCAkMCwoMDxoRDw4ODx8WGBMaJSEnJiQhJCMpLjsyKSw4LCMkM0Y0OD0/QkNCKDFITUhATTtBQj//2wBDAQsMDA8NDx4RER4/KiQqPz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz//wAARCAEsASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDoqKWivTOYSilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooASilooAKKKKVxhRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRT443kbbGpY+gpNpK7DVjKKvx6XMwy7Knt1NSHSWxxMM+61zPG0E7cxqqNR9DMoq3Np9xGMhQ4/wBmquK3hVhUV4u5EoyjuhKKKKskKKKKLgFFFFFwFoooqRhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFGKLgT2ls1zLtHCjlj6VtwwxwJtjXA7+pptpAILdUH3ure5qavncXiZVpWXwo9GjSUFd7hRRRXEbhVS8sknBZAFk9fX61boq6dSVKXNFkyipKzOaZSrFWGCOCKStPVoB8s6jk8N/SsyvpqFZVqamjzKkOSVgooorYgKKKKAFopaKQCUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACUUtFACVNZpvu4h/tZqKp7M7byIn+9is6rfs5W7MqHxI3aKKK+VPWCiiigAooooAgvV32co/2c/lWDW/dtttJSf7pFYNe3lt/Zy9ThxXxISilor0zlEopaKACiloqQEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEopaKAEpQSCCOooooGb8EomhVx3HPsakrFsrk28mDkxt1Hp71so6ugZGBU9CK+dxOHdGfkelSqKa8xaKKK5TUKKKgublLdOeXPRaqEJTlyxWom1FXZW1WYBFhB5PJ+lZdPkdpHLucsTzTa+kw9L2NNRPMqT55XEopaK2MxKKWigBcUYoopXGGKMUUUXAMUYooouAYoxRRRcAxRiiii4BijFFFFwDFGKKKLgGKMUUUXAMUYooouAYoxRRRcAxRiiii4BijFFFFwDFGKKKLgGKkhmkgbMbY9R2NR0VMkpKzQ02ndGjHqfH7yPn1U086lFjhHJ/CsuiuV4Kg3exqq9RdS7LqMjDEahPfqapsWZizHJPUmkorenShS+BWM5TlLdhijFFFa3JDFGKKKLgGKMUUUXAWiiipuAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAUUUUXAKKKKLgFFFFFwCiiii4BRRRRcAoooouAtFFFSMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAWiiikMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiipI4ZJT8ik+/ahtLcEm9ER0VbFhJjl1FNeylXkYb6Go9pHuX7OfYq0tKQQcEEH0NJV3ICiiigAooooAKKKKACiiigAooooAKK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"};
+var KEY_K="pl_key",MODEL_K="pl_model",POSTS_K="pl_posts",DEF_MODEL="gemini-2.5-flash-image";
+var I={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+ search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+ reels:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v10M7 12h10"/></svg>',
+ heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.3-8.6C1.2 8.3 2.8 5 6.2 5c2 0 3.2 1.2 3.8 2.2C10.6 6.2 11.8 5 13.8 5c3.4 0 5 3.3 3.5 6.4C19 15.6 12 20 12 20z"/></svg>',
+ heartF:'<svg viewBox="0 0 24 24" fill="#ed4956" stroke="#ed4956" stroke-width="1"><path d="M12 20s-7-4.4-9.3-8.6C1.2 8.3 2.8 5 6.2 5c2 0 3.2 1.2 3.8 2.2C10.6 6.2 11.8 5 13.8 5c3.4 0 5 3.3 3.5 6.4C19 15.6 12 20 12 20z"/></svg>',
+ comment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.3A8.5 8.5 0 1 1 21 12z"/></svg>',
+ share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>',
+ bm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
+ bmF:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
+ gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.4 1a7.5 7.5 0 0 0-1.7-1L14.9 3H9.1l-.4 2.6a7.5 7.5 0 0 0-1.7 1l-2.4-1-2 3.4L4.6 11a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7.5 7.5 0 0 0 1.7 1l.4 2.6h5.8l.4-2.6a7.5 7.5 0 0 0 1.7-1l2.4 1 2-3.4z"/></svg>',
+ cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l1.4-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.4"/></svg>'
 };
+var STYLES=[["cinematic","Sinematik"],["cyberpunk","Cyberpunk"],["anime","Anime"],["historical","Tarihi"],["professional","Profesyonel"],["luxury","Lüks"],["fantasy","Fantastik"],["nature","Doğa"]];
+var SD={cinematic:"cinematic film still, dramatic three-point lighting, shallow depth of field, 35mm anamorphic lens, teal-and-orange grade, volumetric light, film grain, ultra-detailed, 8k",cyberpunk:"cyberpunk megacity at night, neon signage, rain-soaked reflective streets, cyan-magenta rim light, fog, high contrast, cinematic, ultra-detailed",anime:"high-quality anime illustration, clean line art, cel shading, vibrant colors, soft studio lighting, detailed background",historical:"classical Ottoman-era oil portrait, ornate period attire, warm Rembrandt lighting, museum-quality brushwork",professional:"professional studio headshot, clean neutral background, soft key light, 85mm lens, sharp focus, natural skin tones",luxury:"luxury fashion editorial, studio strobe lighting, elegant composition, glossy magazine aesthetic, refined grade",fantasy:"epic fantasy scene, cinematic god rays, painterly detail, dramatic composition, ultra-detailed",nature:"cinematic documentary look, natural golden-hour light, wide-angle depth, true-to-life colors"};
 
-/* ---------- helpers ---------- */
+var nav="feed", cstep="pick", captured=null, resultUrl=null, facing="user", camStream=null, busy=false, triedResolve=false;
+var cur={prompt:"",style:"cinematic"};
 function $(id){return document.getElementById(id);}
 function getKey(){return localStorage.getItem(KEY_K)||"";}
-function getModel(){return localStorage.getItem(MODEL_K)||DEFAULT_MODEL;}
-function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},2600);}
+function getModel(){return localStorage.getItem(MODEL_K)||DEF_MODEL;}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},3200);}
 
-/* ---------- settings ---------- */
-function openSettings(){$("keyInput").value=getKey();$("modelInput").value=getModel();$("settings").classList.add("show");}
+function seedPosts(){return [
+ {id:"s1",user:"ayse_art",img:SEED.cyberpunk,cap:"Gece şehri 🌃 #cyberpunk",likes:128,liked:false,saved:false,time:"2 saat",mine:false,comments:[["zeynep","Harika!"],["mehmet.k","Bu promptu istiyorum"]]},
+ {id:"s2",user:"mehmet.k",img:SEED.cinematic,cap:"#cinematic portre denemesi",likes:86,liked:false,saved:false,time:"5 saat",mine:false,comments:[["demo","Renkler süper"]]},
+ {id:"s3",user:"zeynep",img:SEED.anime,cap:"#anime moda çekimi ✨",likes:203,liked:false,saved:false,time:"1 gün",mine:false,comments:[["ayse_art","Stil tam isabet"]]}
+];}
+function loadPosts(){try{var p=JSON.parse(localStorage.getItem(POSTS_K));if(p&&p.length)return p;}catch(e){}var s=seedPosts();savePosts(s);return s;}
+function savePosts(p){localStorage.setItem(POSTS_K,JSON.stringify(p));}
+var POSTS=loadPosts();
+
+/* settings */
+function openSettings(){$("keyInput").value=getKey();$("modelInput").value=getModel();$("testout").textContent="";$("settings").classList.add("show");}
 function closeSettings(){$("settings").classList.remove("show");}
-function saveSettings(){
-  var k=$("keyInput").value.trim(), m=$("modelInput").value.trim()||DEFAULT_MODEL;
-  if(k) localStorage.setItem(KEY_K,k); else localStorage.removeItem(KEY_K);
-  localStorage.setItem(MODEL_K,m);
-  closeSettings(); toast("Ayarlar kaydedildi.");
+function saveSettings(){var k=$("keyInput").value.trim(),m=$("modelInput").value.trim()||DEF_MODEL;if(k)localStorage.setItem(KEY_K,k);else localStorage.removeItem(KEY_K);localStorage.setItem(MODEL_K,m);closeSettings();toast("Ayarlar kaydedildi");}
+async function testConn(){
+ var key=$("keyInput").value.trim()||getKey();
+ var out=$("testout");
+ if(!key){out.textContent="Önce bir anahtar girin.";return;}
+ if(!key.indexOf){}
+ out.textContent="Test ediliyor…";
+ if(key.slice(0,4)!=="AIza"){out.textContent="⚠ Anahtar 'AIza' ile başlamıyor — bu büyük olasılıkla bir AI Studio API anahtarı değil. Yine de deneniyor…\n";}
+ try{
+  var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models",{headers:{"x-goog-api-key":key}});
+  var d=await r.json();
+  if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));
+  var names=(d.models||[]).map(function(m){return m.name.replace("models/","");});
+  var imgs=names.filter(function(n){return n.indexOf("image")>=0;});
+  if(imgs.length){$("modelInput").value=imgs[0];}
+  out.textContent="✓ Bağlantı başarılı. "+names.length+" model bulundu.\nGörsel modeli: "+(imgs[0]||"bulunamadı — hesabınızda görsel modeli etkin değil")+(imgs.length?" (otomatik seçildi)":"");
+ }catch(e){ out.textContent="✗ Bağlantı yok: "+e.message+"\n→ Geçerli bir AIza... anahtarı girin (aistudio.google.com/apikey)."; }
 }
 
-/* ---------- camera ---------- */
-function openCam(){
-  $("cam").style.display="flex";
-  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    navigator.mediaDevices.getUserMedia({video:{facingMode:facing},audio:false})
-      .then(function(s){camStream=s;$("camvid").srcObject=s;})
-      .catch(function(){closeCam();$("fileinp").click();});
-  } else { closeCam(); $("fileinp").click(); }
-}
-function stopCam(){ if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;} }
-function closeCam(){ stopCam(); $("cam").style.display="none"; }
-function flipCam(){ facing=(facing==="user")?"environment":"user"; stopCam(); openCam(); }
-function capture(){
-  var v=$("camvid"), c=document.createElement("canvas");
-  c.width=v.videoWidth||720; c.height=v.videoHeight||720;
-  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
-  captured=c.toDataURL("image/jpeg",0.9);
-  resultUrl=null; closeCam(); render();
-}
-$("fileinp").addEventListener("change",function(e){
-  var f=e.target.files[0]; if(!f)return;
-  var r=new FileReader(); r.onload=function(){captured=r.result;resultUrl=null;render();}; r.readAsDataURL(f);
-});
+/* camera */
+function openCam(){$("cam").style.display="flex";if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){navigator.mediaDevices.getUserMedia({video:{facingMode:facing},audio:false}).then(function(s){camStream=s;$("camvid").srcObject=s;}).catch(function(){closeCam();$("fileinp").click();});}else{closeCam();$("fileinp").click();}}
+function stopCam(){if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;}}
+function closeCam(){stopCam();$("cam").style.display="none";}
+function flipCam(){facing=(facing==="user")?"environment":"user";stopCam();openCam();}
+function capture(){var v=$("camvid"),c=document.createElement("canvas");c.width=v.videoWidth||720;c.height=v.videoHeight||720;c.getContext("2d").drawImage(v,0,0,c.width,c.height);captured=c.toDataURL("image/jpeg",0.9);resultUrl=null;closeCam();go("create");cstep="pick";render();}
+$("fileinp").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){captured=r.result;resultUrl=null;go("create");cstep="pick";render();};r.readAsDataURL(f);});
 
-/* ---------- prompt ---------- */
-function buildPrompt(){
-  var base=(state.prompt||"").trim();
-  var desc=STYLE_DESC[state.style]||"";
-  var head="Edit the provided photo of the person. Preserve the subject's identity, facial features and body. ";
-  return head + (base?base+". ":"") + desc + ", highly detailed, professional quality.";
-}
-function localEnhance(text,style){
-  var t=(text||"bu fotoğrafı dönüştür").trim().replace(/\.$/,"");
-  var d=STYLE_DESC[style]||STYLE_DESC.cinematic;
-  return "Kullanıcının yüz ve kimliğini koruyarak, "+t+"; "+d+"; kompozisyon dengeli, ışık profesyonel, yüksek çözünürlük, fotogerçekçi kalite.";
-}
-async function geminiText(prompt){
-  var key=getKey(); if(!key) throw new Error("no-key");
-  var url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-  var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-  var data=await res.json();
-  if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-  var parts=(((data.candidates||[])[0]||{}).content||{}).parts||[];
-  var txt=parts.map(function(p){return p.text||"";}).join("").trim();
-  if(!txt) throw new Error("empty");
-  return txt;
-}
-async function enhance(){
-  var ta=$("promptEl"); var user=ta.value.trim();
-  toast("Prompt geliştiriliyor…");
-  var instr="Asagidaki kullanici istegini, bir kisinin fotografini AI ile donusturmek icin tek bir profesyonel GORSEL URETIM PROMPTUNA cevir. "+
-    "Kisinin kimligini ve yuz hatlarini koru. Isik, lens, kompozisyon, renk derecelendirme ve atmosfer detaylari ekle. "+
-    "Secilen stil: "+state.style+" ("+(STYLE_DESC[state.style]||"")+"). "+
-    "Sadece nihai promptu Turkce yaz, baska aciklama ekleme. Kullanici istegi: "+(user||"bu fotografi donustur");
-  try{
-    var out=await geminiText(instr);
-    ta.value=out; state.prompt=out; toast("Profesyonel prompt hazır.");
-  }catch(e){
-    ta.value=localEnhance(user,state.style); state.prompt=ta.value;
-    if(String(e.message)==="no-key") toast("Anahtar yok — yerel profesyonel şablon kullanıldı.");
-    else toast("Çevrimdışı şablon kullanıldı.");
-  }
-}
+/* prompt */
+function buildPrompt(){var b=(cur.prompt||"").trim();var d=SD[cur.style]||"";return "Edit the provided photo of the person. Preserve the subject's identity, facial features and body. "+(b?b+". ":"")+d+", highly detailed, professional quality.";}
+function localEnhance(t,s){var x=(t||"bu fotoğrafı dönüştür").trim().replace(/\.$/,"");return "Kullanıcının yüz ve kimliğini koruyarak, "+x+"; "+(SD[s]||SD.cinematic)+"; kompozisyon dengeli, ışık profesyonel, yüksek çözünürlük, fotogerçekçi kalite.";}
+async function geminiText(p){var key=getKey();if(!key)throw new Error("no-key");var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({contents:[{parts:[{text:p}]}]})});var d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));var parts=(((d.candidates||[])[0]||{}).content||{}).parts||[];var txt=parts.map(function(x){return x.text||"";}).join("").trim();if(!txt)throw new Error("empty");return txt;}
+async function enhance(){var ta=$("promptEl");var u=ta.value.trim();toast("Prompt geliştiriliyor…");var instr="Asagidaki istegi, bir kisinin fotografini AI ile donusturmek icin tek bir profesyonel GORSEL URETIM PROMPTUNA cevir. Kisinin kimligini ve yuz hatlarini koru. Isik, lens, kompozisyon, renk derecelendirme ve atmosfer detaylari ekle. Stil: "+cur.style+". Sadece nihai promptu Turkce yaz. Istek: "+(u||"bu fotografi donustur");try{var o=await geminiText(instr);ta.value=o;cur.prompt=o;toast("Profesyonel prompt hazır ✨");}catch(e){ta.value=localEnhance(u,cur.style);cur.prompt=ta.value;toast(String(e.message)==="no-key"?"Anahtar yok — yerel profesyonel şablon":"Çevrimdışı şablon kullanıldı");}}
 
-/* ---------- generation (REAL Gemini, captured photo) ---------- */
-function imagePart(data){
-  for(var i=0;i<(data.candidates||[]).length;i++){
-    var parts=((data.candidates[i].content||{}).parts)||[];
-    for(var j=0;j<parts.length;j++){
-      var inl=parts[j].inline_data||parts[j].inlineData;
-      if(inl&&inl.data) return {data:inl.data,mime:inl.mime_type||inl.mimeType||"image/png"};
-    }
-  }
-  return null;
-}
+/* generation */
+function imgPart(d){for(var i=0;i<(d.candidates||[]).length;i++){var ps=((d.candidates[i].content||{}).parts)||[];for(var j=0;j<ps.length;j++){var inl=ps[j].inline_data||ps[j].inlineData;if(inl&&inl.data)return{data:inl.data,mime:inl.mime_type||inl.mimeType||"image/png"};}}return null;}
+async function callImage(model,b64,mime,key){var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({contents:[{parts:[{text:buildPrompt()},{inline_data:{mime_type:mime,data:b64}}]}],generationConfig:{responseModalities:["IMAGE"]}})});var d=await r.json();if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));var img=imgPart(d);if(!img)throw new Error("Yanıtta görsel yok (model görsel üretmiyor olabilir).");return "data:"+img.mime+";base64,"+img.data;}
+async function resolveImageModel(key){var r=await fetch("https://generativelanguage.googleapis.com/v1beta/models",{headers:{"x-goog-api-key":key}});var d=await r.json();if(!r.ok)return null;var n=(d.models||[]).map(function(m){return m.name.replace("models/","");}).filter(function(x){return x.indexOf("image")>=0;});return n[0]||null;}
 async function generate(){
-  if(busy) return;
-  if(!captured){ toast("Önce bir fotoğraf çekin veya seçin."); return; }
-  var key=getKey();
-  if(!key){ openSettings(); toast("Önce Gemini API anahtarınızı girin."); return; }
-  busy=true; state.screen="loading"; render();
-  try{
-    var b64=captured.split(",")[1];
-    var mime=captured.substring(5,captured.indexOf(";"))||"image/jpeg";
-    var model=getModel();
-    var url="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent";
-    var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-      body:JSON.stringify({
-        contents:[{parts:[{text:buildPrompt()},{inline_data:{mime_type:mime,data:b64}}]}],
-        generationConfig:{responseModalities:["IMAGE"]}
-      })});
-    var data=await res.json();
-    if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-    var img=imagePart(data);
-    if(!img) throw new Error("Yanıtta görsel yok. Model adını (Ayarlar) ve anahtarın görsel iznini kontrol edin.");
-    resultUrl="data:"+img.mime+";base64,"+img.data;
-    state.screen="result";
-  }catch(e){
-    state.screen="studio";
-    toast("Üretim hatası: "+e.message);
-  }finally{
-    busy=false; render();
+ if(busy)return;
+ if(!captured){toast("Önce bir fotoğraf çekin/seçin");return;}
+ var key=getKey();
+ if(!key){openSettings();toast("Önce Gemini API anahtarınızı girin");return;}
+ busy=true;cstep="loading";render();
+ var b64=captured.split(",")[1],mime=captured.substring(5,captured.indexOf(";"))||"image/jpeg";
+ try{
+  try{ resultUrl=await callImage(getModel(),b64,mime,key); }
+  catch(e1){
+    if(!triedResolve){ triedResolve=true; var m=await resolveImageModel(key); if(m&&m!==getModel()){ localStorage.setItem(MODEL_K,m); resultUrl=await callImage(m,b64,mime,key); } else { throw e1; } }
+    else { throw e1; }
   }
+  cstep="result";
+ }catch(e){ cstep="pick"; toast("Üretim hatası: "+e.message); }
+ finally{ busy=false; render(); }
 }
+function shareToFeed(){
+ if(!resultUrl)return;
+ POSTS.unshift({id:"u"+Date.now(),user:"sen",img:resultUrl,cap:(cur.prompt||"AI dönüşüm").slice(0,80),likes:0,liked:false,saved:false,time:"şimdi",mine:true,comments:[]});
+ savePosts(POSTS); captured=null;resultUrl=null;cur.prompt="";cstep="pick";go("feed");toast("Paylaşıldı 🎉");
+}
+function downloadResult(){if(!resultUrl)return;var a=document.createElement("a");a.href=resultUrl;a.download="promptla.png";a.click();}
 
-/* ---------- share / download ---------- */
-function downloadResult(){
-  if(!resultUrl) return;
-  var a=document.createElement("a"); a.href=resultUrl; a.download="promptla.png"; a.click();
-}
-async function shareResult(){
-  if(!resultUrl) return;
-  try{
-    var blob=await (await fetch(resultUrl)).blob();
-    var file=new File([blob],"promptla.png",{type:blob.type});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:"Promptla",text:"AI ile üretildi"});
-    } else { downloadResult(); }
-  }catch(e){ downloadResult(); }
-}
+/* interactions */
+function like(id){var p=POSTS.find(function(x){return x.id===id;});if(!p)return;p.liked=!p.liked;p.likes+=p.liked?1:-1;savePosts(POSTS);render();}
+function save(id){var p=POSTS.find(function(x){return x.id===id;});if(!p)return;p.saved=!p.saved;savePosts(POSTS);render();}
+function go(t){nav=t;render();window.scrollTo(0,0);}
 
-/* ---------- render ---------- */
+/* render */
+function hdr(){
+ var right='<span onclick="openSettings()" title="Ayarlar">'+I.gear+'</span><span onclick="toast(\'Bildirimler yakında\')">'+I.heart+'</span>';
+ if(nav==="profile") return '<div style="font-weight:700;font-size:16px">sen</div><div class="hicons">'+right+'</div>';
+ if(nav==="create") return '<div style="font-weight:700;font-size:16px">Yeni gönderi</div><div class="hicons">'+right+'</div>';
+ return '<div class="logo">Promptla</div><div class="hicons">'+right+'</div>';
+}
+function storiesHtml(){
+ var people=[["Sen",true],["ayse_art",false],["mehmet.k",false],["zeynep",false],["burak",false],["elif",false]];
+ var h='<div class="stories">';
+ people.forEach(function(p){
+  h+='<div class="story" onclick="'+(p[1]?'openCam()':'toast(\'Hikaye yakında\')')+'"><div style="position:relative"><div class="ring '+(p[1]?'me':'')+'"><div class="av">'+(p[1]?I.plus.replace(/#fff/g,"#7C5CFF"):p[0][0].toUpperCase())+'</div></div></div><div class="nm">'+p[0]+'</div></div>';
+ });
+ return h+'</div>';
+}
+function postHtml(p){
+ return '<div class="post"><div class="phead"><div class="pav r"><div>'+p.user[0].toUpperCase()+'</div></div><div class="pname">'+p.user+'</div>'
+  +'<span class="ailbl">✦ AI</span><div style="margin-left:auto;color:#fff">···</div></div>'
+  +'<img class="pimg" src="'+p.img+'">'
+  +'<div class="pact"><span onclick="like(\''+p.id+'\')">'+(p.liked?I.heartF:I.heart)+'</span><span onclick="toast(\'Yorumlar\')">'+I.comment+'</span><span onclick="toast(\'Paylaş\')">'+I.share+'</span><span class="bm" onclick="save(\''+p.id+'\')">'+(p.saved?I.bmF:I.bm)+'</span></div>'
+  +'<div class="plikes">'+p.likes.toLocaleString("tr-TR")+' beğenme</div>'
+  +'<div class="pcap"><b>'+p.user+'</b> '+p.cap+'</div>'
+  +(p.comments&&p.comments.length?'<div class="pcom">'+p.comments.length+' yorumun tümünü gör</div>':'')
+  +'<div class="ptime">'+p.time+'</div></div>';
+}
 function render(){
-  var m=$("main"), h="";
-  if(state.screen==="loading"){
-    h='<div class="center"><div class="spinner"></div><div style="color:var(--sec)">Gemini ile üretiliyor…</div><div style="color:var(--sec);font-size:12px">Çektiğiniz fotoğraf dönüştürülüyor</div></div>';
-    m.innerHTML=h; return;
-  }
-  if(state.screen==="result"){
-    h='<div class="card result">'
-      +'<div style="position:relative"><img class="big" src="'+resultUrl+'"><div class="chip">&#10024; AI ile üretildi</div></div>'
-      +'<div class="ba"><div class="col"><img src="'+captured+'"><div class="cap">Önce (çektiğin)</div></div><div class="col"><img src="'+resultUrl+'"><div class="cap">Sonra (AI)</div></div></div>'
-      +'<div class="ractions"><button class="acc" onclick="shareResult()">Paylaş</button><button style="background:var(--alt)" onclick="downloadResult()">İndir</button></div>'
-      +'<div class="disc">Bu içerik yapay zekâ ile üretilmiştir. Gerçek olay, belge veya kanıt olarak sunulmamalıdır.</div>'
-      +'</div>'
-      +'<button class="gen acc" onclick="state.screen=\'studio\';render()">Yeni dönüşüm</button>';
-    m.innerHTML=h; return;
-  }
-  // studio
-  h='<div class="card"><div class="src" onclick="openCam()">';
-  if(captured){
-    h+='<img src="'+captured+'"><div class="badge">Çekilen fotoğraf</div><div class="chip" style="border:0">&#128247; Değiştir</div>';
-  } else {
-    h+='<div class="hint"><span class="ic">&#128247;</span>Kameraya dokun, fotoğraf çek<br><span style="font-size:12px">veya galeriden seç</span></div>';
-  }
-  h+='</div></div>';
-  h+='<div class="seg"><button class="b-cam" onclick="openCam()">&#128247; Fotoğraf çek</button><button class="b-gal" onclick="document.getElementById(\'fileinp\').click()">&#128194; Galeriden seç</button></div>';
-  h+='<label class="l">Prompt</label><textarea id="promptEl" placeholder="Örn: Beni sinematik bir bilim kurgu sahnesine dönüştür" oninput="state.prompt=this.value">'+(state.prompt||"")+'</textarea>';
-  h+='<div class="enh"><button onclick="enhance()">&#10022; Promptu geliştir</button></div>';
-  h+='<label class="l">Hazır stiller</label><div class="styles">';
-  STYLES.forEach(function(s){ h+='<button class="sty'+(state.style===s[0]?' on':'')+'" onclick="state.style=\''+s[0]+'\';render()">'+s[1]+'</button>'; });
-  h+='</div>';
-  h+='<button class="gen acc" onclick="generate()"'+(busy?' disabled':'')+'>Üret</button>';
-  h+='<div class="note">Çektiğiniz fotoğraf Gemini ile dönüştürülür. Anahtar yoksa &#9881; Ayarlar\'dan ekleyin.</div>';
-  m.innerHTML=h;
-  var ta=$("promptEl"); if(ta){ ta.value=state.prompt||""; }
+ $("hdr").innerHTML=hdr();
+ var m=$("main"),h="";
+ if(nav==="feed"){ h=storiesHtml(); POSTS.forEach(function(p){h+=postHtml(p);}); }
+ else if(nav==="explore"){ h='<div class="grid">'; POSTS.concat(seedPosts()).forEach(function(p){h+='<img src="'+p.img+'" onclick="go(\'feed\')">';}); h+='</div>'; }
+ else if(nav==="reels"){ h='<div id="reels">'; POSTS.forEach(function(p){h+='<div class="reel"><img src="'+p.img+'"><div class="reelmeta"><div style="font-weight:700">'+p.user+' <span class="ailbl">✦ AI</span></div><div style="font-size:13px;margin-top:4px">'+p.cap+'</div></div></div>';}); h+='</div>'; }
+ else if(nav==="profile"){
+  var mine=POSTS.filter(function(p){return p.mine;});
+  h='<div class="phdr"><div class="pbig">S</div><div class="stat"><div class="s"><b>'+mine.length+'</b><div>gönderi</div></div><div class="s"><b>128</b><div>takipçi</div></div><div class="s"><b>2</b><div>takip</div></div></div></div>'
+   +'<div class="pbio"><b>Sefa</b><div style="color:var(--sec);font-size:13px">@sen · AI ile üretiyorum ✦</div></div>'
+   +'<div class="pbtns"><button onclick="go(\'create\')">İçerik üret</button><button onclick="openSettings()">Ayarlar</button></div>';
+  if(mine.length){ h+='<div class="grid">'; mine.forEach(function(p){h+='<img src="'+p.img+'">';}); h+='</div>'; }
+  else { h+='<div class="empty">Henüz gönderin yok.<br>Ortadaki + ile ilk AI içeriğini üret.</div>'; }
+ }
+ else if(nav==="create"){ h=createHtml(); }
+ m.innerHTML=h;
+ if(nav==="create"&&cstep==="pick"){var ta=$("promptEl");if(ta)ta.value=cur.prompt||"";}
+ renderNav();
 }
-
-window.addEventListener("load",function(){
-  render();
-  if(!getKey()){ setTimeout(function(){ openSettings(); toast("Başlamak için Gemini API anahtarınızı girin."); }, 400); }
-});
-</script>
-</body>
-</html>
-  .gen:disabled{opacity:.55}
-  .note{color:var(--sec);font-size:11px;text-align:center;margin-top:10px}
-  .result{padding:0}
-  .result .big{width:100%;display:block}
-  .ba{display:flex;gap:8px;padding:12px}
-  .ba .col{flex:1;text-align:center}
-  .ba img{width:100%;height:90px;object-fit:cover;border-radius:10px}
-  .ba .cap{font-size:11px;color:var(--sec);margin-top:4px}
-  .ractions{display:flex;gap:10px;padding:0 12px 14px}
-  .ractions button{flex:1;height:46px;border-radius:13px;border:0;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
-  .disc{background:var(--alt);border-radius:12px;padding:11px;font-size:11px;color:var(--sec);margin:0 12px 12px}
-  /* overlays */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;z-index:30}
-  .overlay.show{display:flex}
-  .sheet{width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;padding:18px;max-height:88dvh;overflow:auto}
-  .sheet h3{margin:4px 0 10px;font-size:17px}
-  .sheet .row{display:flex;gap:10px;margin-top:12px}
-  .sheet button.primary{height:48px;border-radius:13px;border:0;color:#fff;font-weight:700;font-size:15px;flex:1;cursor:pointer}
-  .sheet button.ghost{height:48px;border-radius:13px;border:1px solid #333;background:none;color:var(--txt);flex:1;cursor:pointer}
-  .warn{background:rgba(255,92,124,.12);border:1px solid rgba(255,92,124,.4);color:#ffb3c2;border-radius:12px;padding:11px;font-size:12px;margin-top:10px}
-  a{color:var(--blu)}
-  /* camera */
-  #cam{position:fixed;inset:0;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:40}
-  #cam video{width:100%;height:100%;object-fit:cover}
-  #cam .bar{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-around;padding:24px}
-  #cam .shutter{width:70px;height:70px;border-radius:50%;background:#fff;border:5px solid var(--pur);cursor:pointer}
-  #cam .tbtn{color:#fff;background:rgba(0,0,0,.4);border:0;font-size:14px;padding:10px 14px;border-radius:12px;cursor:pointer}
-  .spinner{width:42px;height:42px;border:4px solid var(--alt);border-top-color:var(--pur);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .center{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 0}
-  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#000;border:1px solid #333;color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
-  #toast.show{opacity:1}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <div class="logo">Promptla</div>
-    <button class="gear" onclick="openSettings()" aria-label="Ayarlar">&#9881;</button>
-  </header>
-  <main id="main"></main>
-</div>
-
-<!-- Kamera -->
-<div id="cam">
-  <video id="camvid" autoplay playsinline muted></video>
-  <div class="bar">
-    <button class="tbtn" onclick="closeCam()">Kapat</button>
-    <div class="shutter" onclick="capture()"></div>
-    <button class="tbtn" onclick="flipCam()">Çevir</button>
-  </div>
-</div>
-
-<!-- Ayarlar -->
-<div class="overlay" id="settings">
-  <div class="sheet">
-    <h3>Ayarlar</h3>
-    <label class="l">Gemini API anahtarı</label>
-    <input id="keyInput" type="password" placeholder="AIza... (AI Studio anahtarı)" autocomplete="off">
-    <label class="l">Görsel modeli</label>
-    <input id="modelInput" type="text" placeholder="gemini-2.5-flash-image">
-    <div class="warn">Anahtarınız yalnızca bu cihazda (tarayıcı belleğinde) saklanır, hiçbir yere gönderilmez ve koda/GitHub'a yazılmaz. Anahtarınızı kimseyle paylaşmayın.</div>
-    <div style="font-size:12px;color:var(--sec);margin-top:10px">Anahtar almak için: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a></div>
-    <div class="row">
-      <button class="ghost" onclick="closeSettings()">Vazgeç</button>
-      <button class="primary acc" onclick="saveSettings()">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<input id="fileinp" type="file" accept="image/*" capture="user" style="display:none">
-<div id="toast"></div>
-
-<script>
-"use strict";
-var KEY_K="promptla_gemini_key", MODEL_K="promptla_gemini_model";
-var DEFAULT_MODEL="gemini-2.5-flash-image";
-var captured=null, resultUrl=null, facing="user", camStream=null, busy=false;
-var state={ prompt:"", style:"cinematic", screen:"studio" };
-
-var STYLES=[["cinematic","Sinematik"],["cyberpunk","Cyberpunk"],["anime","Anime"],
-  ["historical","Tarihi/Osmanlı"],["professional","Profesyonel"],["luxury","Lüks"],
-  ["fantasy","Fantastik"],["nature","Doğa"]];
-
-var STYLE_DESC={
-  cinematic:"cinematic film still, dramatic three-point lighting, shallow depth of field, 35mm anamorphic lens, teal-and-orange color grade, volumetric light, subtle film grain, ultra-detailed, 8k",
-  cyberpunk:"cyberpunk megacity at night, glowing neon signage, rain-soaked reflective streets, cyan-magenta rim light, atmospheric fog, high contrast, cinematic, ultra-detailed",
-  anime:"high-quality anime illustration, clean line art, cel shading, vibrant saturated colors, soft studio lighting, expressive, detailed background",
-  historical:"classical Ottoman-era oil portrait, ornate period attire, warm Rembrandt lighting, museum-quality fine brushwork, rich textures",
-  professional:"professional studio headshot, clean neutral background, soft key light with gentle fill, 85mm portrait lens, sharp focus, natural skin tones, LinkedIn-ready",
-  luxury:"luxury fashion editorial, studio strobe lighting, elegant composition, glossy high-end magazine aesthetic, refined color grading",
-  fantasy:"epic fantasy scene, cinematic god rays, painterly detail, rich atmosphere, dramatic composition, ultra-detailed",
-  nature:"cinematic documentary look, natural golden-hour lighting, wide-angle depth, true-to-life colors, crisp detail"
-};
-
-/* ---------- helpers ---------- */
-function $(id){return document.getElementById(id);}
-function getKey(){return localStorage.getItem(KEY_K)||"";}
-function getModel(){return localStorage.getItem(MODEL_K)||DEFAULT_MODEL;}
-function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},2600);}
-
-/* ---------- settings ---------- */
-function openSettings(){$("keyInput").value=getKey();$("modelInput").value=getModel();$("settings").classList.add("show");}
-function closeSettings(){$("settings").classList.remove("show");}
-function saveSettings(){
-  var k=$("keyInput").value.trim(), m=$("modelInput").value.trim()||DEFAULT_MODEL;
-  if(k) localStorage.setItem(KEY_K,k); else localStorage.removeItem(KEY_K);
-  localStorage.setItem(MODEL_K,m);
-  closeSettings(); toast("Ayarlar kaydedildi.");
+function createHtml(){
+ if(cstep==="loading") return '<div class="center"><div class="spin"></div><div style="color:var(--sec)">Gemini ile üretiliyor…</div><div style="color:var(--sec);font-size:12px">Çektiğin fotoğraf dönüştürülüyor</div></div>';
+ if(cstep==="result") return '<div class="wrap2"><div style="position:relative"><img src="'+resultUrl+'" style="width:100%;border-radius:14px"><span class="ailbl" style="position:absolute;left:10px;top:10px">✦ AI ile üretildi</span></div>'
+  +'<div class="ba"><div class="c"><img src="'+captured+'"><div class="t">Önce (çektiğin)</div></div><div class="c"><img src="'+resultUrl+'"><div class="t">Sonra (AI)</div></div></div>'
+  +'<div class="ract"><button class="acc" onclick="shareToFeed()">Paylaş</button><button style="background:var(--alt)" onclick="downloadResult()">İndir</button></div>'
+  +'<div class="disc">Bu içerik yapay zekâ ile üretilmiştir. Gerçek olay/kanıt olarak sunulmamalıdır.</div>'
+  +'<button class="gen" style="background:var(--alt)" onclick="cstep=\'pick\';render()">Yeniden üret</button></div>';
+ var h='<div class="wrap2"><div class="srcbox" onclick="openCam()">';
+ if(captured) h+='<img src="'+captured+'"><span class="ailbl" style="position:absolute;left:10px;top:10px">Çekilen fotoğraf</span>';
+ else h+='<div class="hint">'+I.cam.replace(/currentColor/g,"#888")+'<br>Kameraya dokun, fotoğraf çek<br><span style="font-size:12px">veya galeriden seç</span></div>';
+ h+='</div>';
+ h+='<div class="seg"><button onclick="openCam()">'+I.cam+' Fotoğraf çek</button><button onclick="document.getElementById(\'fileinp\').click()">Galeriden seç</button></div>';
+ h+='<label class="l">Prompt</label><textarea id="promptEl" placeholder="Örn: Beni sinematik bir bilim kurgu sahnesine dönüştür" oninput="cur.prompt=this.value"></textarea><div class="enh"><button onclick="enhance()">✦ Promptu geliştir</button></div>';
+ h+='<label class="l">Hazır stiller</label><div class="styles">';
+ STYLES.forEach(function(s){h+='<button class="sty'+(cur.style===s[0]?' on':'')+'" onclick="cur.style=\''+s[0]+'\';render()">'+s[1]+'</button>';});
+ h+='</div><button class="gen acc" onclick="generate()"'+(busy?' disabled':'')+'>Üret</button><div class="note">Çektiğin fotoğraf Gemini ile dönüştürülür. Anahtar için ⚙ Ayarlar.</div></div>';
+ return h;
 }
-
-/* ---------- camera ---------- */
-function openCam(){
-  $("cam").style.display="flex";
-  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    navigator.mediaDevices.getUserMedia({video:{facingMode:facing},audio:false})
-      .then(function(s){camStream=s;$("camvid").srcObject=s;})
-      .catch(function(){closeCam();$("fileinp").click();});
-  } else { closeCam(); $("fileinp").click(); }
+function renderNav(){
+ var items=[["feed",I.home],["explore",I.search],["create",null],["reels",I.reels],["profile",null]];
+ $("bnav").innerHTML=items.map(function(it){
+  if(it[0]==="create")return '<div class="it" onclick="captured=null;resultUrl=null;cstep=\'pick\';go(\'create\')"><div class="pa">'+I.plus+'</div></div>';
+  if(it[0]==="profile")return '<div class="it '+(nav==="profile"?"on":"")+'" onclick="go(\'profile\')"><div class="navav">S</div></div>';
+  return '<div class="it '+(nav===it[0]?"on":"")+'" onclick="go(\''+it[0]+'\')">'+it[1]+'</div>';
+ }).join("");
 }
-function stopCam(){ if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;} }
-function closeCam(){ stopCam(); $("cam").style.display="none"; }
-function flipCam(){ facing=(facing==="user")?"environment":"user"; stopCam(); openCam(); }
-function capture(){
-  var v=$("camvid"), c=document.createElement("canvas");
-  c.width=v.videoWidth||720; c.height=v.videoHeight||720;
-  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
-  captured=c.toDataURL("image/jpeg",0.9);
-  resultUrl=null; closeCam(); render();
-}
-$("fileinp").addEventListener("change",function(e){
-  var f=e.target.files[0]; if(!f)return;
-  var r=new FileReader(); r.onload=function(){captured=r.result;resultUrl=null;render();}; r.readAsDataURL(f);
-});
-
-/* ---------- prompt ---------- */
-function buildPrompt(){
-  var base=(state.prompt||"").trim();
-  var desc=STYLE_DESC[state.style]||"";
-  var head="Edit the provided photo of the person. Preserve the subject's identity, facial features and body. ";
-  return head + (base?base+". ":"") + desc + ", highly detailed, professional quality.";
-}
-function localEnhance(text,style){
-  var t=(text||"bu fotoğrafı dönüştür").trim().replace(/\.$/,"");
-  var d=STYLE_DESC[style]||STYLE_DESC.cinematic;
-  return "Kullanıcının yüz ve kimliğini koruyarak, "+t+"; "+d+"; kompozisyon dengeli, ışık profesyonel, yüksek çözünürlük, fotogerçekçi kalite.";
-}
-async function geminiText(prompt){
-  var key=getKey(); if(!key) throw new Error("no-key");
-  var url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-  var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
-  var data=await res.json();
-  if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-  var parts=(((data.candidates||[])[0]||{}).content||{}).parts||[];
-  var txt=parts.map(function(p){return p.text||"";}).join("").trim();
-  if(!txt) throw new Error("empty");
-  return txt;
-}
-async function enhance(){
-  var ta=$("promptEl"); var user=ta.value.trim();
-  toast("Prompt geliştiriliyor…");
-  var instr="Asagidaki kullanici istegini, bir kisinin fotografini AI ile donusturmek icin tek bir profesyonel GORSEL URETIM PROMPTUNA cevir. "+
-    "Kisinin kimligini ve yuz hatlarini koru. Isik, lens, kompozisyon, renk derecelendirme ve atmosfer detaylari ekle. "+
-    "Secilen stil: "+state.style+" ("+(STYLE_DESC[state.style]||"")+"). "+
-    "Sadece nihai promptu Turkce yaz, baska aciklama ekleme. Kullanici istegi: "+(user||"bu fotografi donustur");
-  try{
-    var out=await geminiText(instr);
-    ta.value=out; state.prompt=out; toast("Profesyonel prompt hazır.");
-  }catch(e){
-    ta.value=localEnhance(user,state.style); state.prompt=ta.value;
-    if(String(e.message)==="no-key") toast("Anahtar yok — yerel profesyonel şablon kullanıldı.");
-    else toast("Çevrimdışı şablon kullanıldı.");
-  }
-}
-
-/* ---------- generation (REAL Gemini, captured photo) ---------- */
-function imagePart(data){
-  for(var i=0;i<(data.candidates||[]).length;i++){
-    var parts=((data.candidates[i].content||{}).parts)||[];
-    for(var j=0;j<parts.length;j++){
-      var inl=parts[j].inline_data||parts[j].inlineData;
-      if(inl&&inl.data) return {data:inl.data,mime:inl.mime_type||inl.mimeType||"image/png"};
-    }
-  }
-  return null;
-}
-async function generate(){
-  if(busy) return;
-  if(!captured){ toast("Önce bir fotoğraf çekin veya seçin."); return; }
-  var key=getKey();
-  if(!key){ openSettings(); toast("Önce Gemini API anahtarınızı girin."); return; }
-  busy=true; state.screen="loading"; render();
-  try{
-    var b64=captured.split(",")[1];
-    var mime=captured.substring(5,captured.indexOf(";"))||"image/jpeg";
-    var model=getModel();
-    var url="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent";
-    var res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-      body:JSON.stringify({
-        contents:[{parts:[{text:buildPrompt()},{inline_data:{mime_type:mime,data:b64}}]}],
-        generationConfig:{responseModalities:["IMAGE"]}
-      })});
-    var data=await res.json();
-    if(!res.ok) throw new Error((data&&data.error&&data.error.message)||("HTTP "+res.status));
-    var img=imagePart(data);
-    if(!img) throw new Error("Yanıtta görsel yok. Model adını (Ayarlar) ve anahtarın görsel iznini kontrol edin.");
-    resultUrl="data:"+img.mime+";base64,"+img.data;
-    state.screen="result";
-  }catch(e){
-    state.screen="studio";
-    toast("Üretim hatası: "+e.message);
-  }finally{
-    busy=false; render();
-  }
-}
-
-/* ---------- share / download ---------- */
-function downloadResult(){
-  if(!resultUrl) return;
-  var a=document.createElement("a"); a.href=resultUrl; a.download="promptla.png"; a.click();
-}
-async function shareResult(){
-  if(!resultUrl) return;
-  try{
-    var blob=await (await fetch(resultUrl)).blob();
-    var file=new File([blob],"promptla.png",{type:blob.type});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:"Promptla",text:"AI ile üretildi"});
-    } else { downloadResult(); }
-  }catch(e){ downloadResult(); }
-}
-
-/* ---------- render ---------- */
-function render(){
-  var m=$("main"), h="";
-  if(state.screen==="loading"){
-    h='<div class="center"><div class="spinner"></div><div style="color:var(--sec)">Gemini ile üretiliyor…</div><div style="color:var(--sec);font-size:12px">Çektiğiniz fotoğraf dönüştürülüyor</div></div>';
-    m.innerHTML=h; return;
-  }
-  if(state.screen==="result"){
-    h='<div class="card result">'
-      +'<div style="position:relative"><img class="big" src="'+resultUrl+'"><div class="chip">&#10024; AI ile üretildi</div></div>'
-      +'<div class="ba"><div class="col"><img src="'+captured+'"><div class="cap">Önce (çektiğin)</div></div><div class="col"><img src="'+resultUrl+'"><div class="cap">Sonra (AI)</div></div></div>'
-      +'<div class="ractions"><button class="acc" onclick="shareResult()">Paylaş</button><button style="background:var(--alt)" onclick="downloadResult()">İndir</button></div>'
-      +'<div class="disc">Bu içerik yapay zekâ ile üretilmiştir. Gerçek olay, belge veya kanıt olarak sunulmamalıdır.</div>'
-      +'</div>'
-      +'<button class="gen acc" onclick="state.screen=\'studio\';render()">Yeni dönüşüm</button>';
-    m.innerHTML=h; return;
-  }
-  // studio
-  h='<div class="card"><div class="src" onclick="openCam()">';
-  if(captured){
-    h+='<img src="'+captured+'"><div class="badge">Çekilen fotoğraf</div><div class="chip" style="border:0">&#128247; Değiştir</div>';
-  } else {
-    h+='<div class="hint"><span class="ic">&#128247;</span>Kameraya dokun, fotoğraf çek<br><span style="font-size:12px">veya galeriden seç</span></div>';
-  }
-  h+='</div></div>';
-  h+='<div class="seg"><button class="b-cam" onclick="openCam()">&#128247; Fotoğraf çek</button><button class="b-gal" onclick="document.getElementById(\'fileinp\').click()">&#128194; Galeriden seç</button></div>';
-  h+='<label class="l">Prompt</label><textarea id="promptEl" placeholder="Örn: Beni sinematik bir bilim kurgu sahnesine dönüştür" oninput="state.prompt=this.value">'+(state.prompt||"")+'</textarea>';
-  h+='<div class="enh"><button onclick="enhance()">&#10022; Promptu geliştir</button></div>';
-  h+='<label class="l">Hazır stiller</label><div class="styles">';
-  STYLES.forEach(function(s){ h+='<button class="sty'+(state.style===s[0]?' on':'')+'" onclick="state.style=\''+s[0]+'\';render()">'+s[1]+'</button>'; });
-  h+='</div>';
-  h+='<button class="gen acc" onclick="generate()"'+(busy?' disabled':'')+'>Üret</button>';
-  h+='<div class="note">Çektiğiniz fotoğraf Gemini ile dönüştürülür. Anahtar yoksa &#9881; Ayarlar\'dan ekleyin.</div>';
-  m.innerHTML=h;
-  var ta=$("promptEl"); if(ta){ ta.value=state.prompt||""; }
-}
-
-window.addEventListener("load",function(){
-  render();
-  if(!getKey()){ setTimeout(function(){ openSettings(); toast("Başlamak için Gemini API anahtarınızı girin."); }, 400); }
-});
+window.addEventListener("load",function(){render();if(!getKey()){setTimeout(function(){openSettings();toast("Başlamak için Gemini API anahtarını gir (AIza...)");},500);}});
 </script>
 </body>
 </html>
